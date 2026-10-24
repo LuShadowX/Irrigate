@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Irrigate | CSE274 Applied Machine Learning Project Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+    :root { --ink: #11110f; --muted: #57534b; --faint: #8e897e; --line: #11110f1f; --accent: #2f6db5; --paper: #f5f2ea; --code: #1b1b19; --green: #2f7a46; }
+    @page { size: A4; margin: 15mm 14mm 16mm; }
+    @page :first { margin: 0; }
+    * { box-sizing: border-box; }
+    html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { margin: 0; color: var(--ink); font: 9.6pt/1.55 'Inter', -apple-system, 'Segoe UI', sans-serif; }
+    h1, h2, h3, h4 { letter-spacing: -0.02em; line-height: 1.2; break-after: avoid; }
+    h2 { margin: 0 0 12px; font-size: 20pt; font-weight: 800; letter-spacing: -0.035em; }
+    h3 { margin: 20px 0 6px; font-size: 12pt; font-weight: 700; }
+    h4 { margin: 14px 0 4px; font-size: 10pt; font-weight: 700; }
+    p { margin: 0 0 8px; }
+    a { color: var(--ink); }
+    ul, ol { margin: 4px 0 10px; padding-left: 18px; }
+    li { margin-bottom: 3px; }
+    code { padding: 0.5px 4px; background: #11110f0f; border-radius: 3px; font: 8pt 'JetBrains Mono', ui-monospace, monospace; }
+    b, strong { font-weight: 650; }
+
+    .chapter { break-before: page; }
+    .kicker { margin: 0 0 6px; color: var(--accent); font: 600 7.5pt/1 'JetBrains Mono', monospace; letter-spacing: 0.16em; text-transform: uppercase; }
+    .lead { max-width: 160mm; margin-bottom: 14px; color: var(--muted); font-size: 10.6pt; line-height: 1.55; }
+
+    table { width: 100%; margin: 8px 0 14px; border-collapse: collapse; font-size: 8.5pt; }
+    th, td { padding: 5.5px 7px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+    thead th { color: var(--muted); font: 600 7pt/1.3 'JetBrains Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 1.5px solid var(--ink); }
+    tbody th { font-weight: 650; }
+    tr { break-inside: avoid; }
+    .t-topics tbody th { width: 27%; }
+    .t-topics td:last-child { width: 13%; color: var(--accent); font: 600 7.6pt 'JetBrains Mono', monospace; white-space: nowrap; }
+    .ok { color: var(--green); font-weight: 700; }
+
+    figure { margin: 6px 0 14px; break-inside: avoid; }
+    figure img { display: block; width: 100%; border: 1px solid var(--line); border-radius: 6px; }
+    figcaption { margin-top: 5px; color: var(--muted); font-size: 8pt; line-height: 1.45; }
+    figcaption b { color: var(--ink); }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; align-items: start; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 10px; align-items: start; }
+    .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0 10px; align-items: start; }
+    .fig-phone { max-width: 70mm; }
+    .fig-phone img { max-height: 125mm; object-fit: cover; object-position: top; }
+    .fig-tall img { max-height: 150mm; object-fit: cover; object-position: top; }
+    .fig-short img { max-height: 95mm; object-fit: cover; object-position: top; }
+
+    pre { margin: 6px 0 12px; padding: 10px 12px; overflow: hidden; color: #ecebe6; background: var(--code); border-radius: 6px; font: 7.4pt/1.5 'JetBrains Mono', ui-monospace, monospace; white-space: pre-wrap; break-inside: avoid; }
+    pre .file { display: block; margin-bottom: 6px; color: #7dd3e6; font-weight: 600; }
+    .walk { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; align-items: start; break-inside: avoid; margin-bottom: 6px; }
+    .walk pre { margin-top: 0; }
+    .walk p, .walk li { font-size: 8.8pt; }
+    .tags { margin: 6px 0 0; }
+    .tag { display: inline-block; margin: 0 4px 4px 0; padding: 1.5px 7px; color: var(--accent); background: #2f6db514; border-radius: 99px; font: 600 7pt 'JetBrains Mono', monospace; }
+
+    .note { margin: 8px 0 12px; padding: 9px 12px; background: var(--paper); border-left: 3px solid var(--accent); border-radius: 0 6px 6px 0; font-size: 9pt; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 12px 0 16px; }
+    .stat { padding: 12px; background: var(--paper); border-radius: 8px; }
+    .stat b { display: block; font-size: 19pt; font-weight: 800; letter-spacing: -0.04em; line-height: 1.1; }
+    .stat span { color: var(--muted); font-size: 8pt; }
+    .co-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0 14px; }
+    .co-card { padding: 10px 11px; background: var(--paper); border-radius: 8px; font-size: 8.4pt; break-inside: avoid; }
+    .co-card b { display: block; margin-bottom: 2px; color: var(--accent); font: 700 8.5pt 'JetBrains Mono', monospace; }
+    .co-card em { display: block; margin-top: 5px; color: var(--muted); font-style: normal; font-size: 7.8pt; }
+    .prac { padding: 12px 0 4px; border-top: 1.5px solid var(--ink); break-inside: avoid; }
+    .prac h4 { margin: 0 0 4px; }
+    .prac h4 span { color: var(--accent); font-family: 'JetBrains Mono', monospace; margin-right: 6px; }
+    .toc { columns: 2; column-gap: 14mm; margin-top: 10px; padding: 0; list-style: none; }
+    .toc li { display: flex; gap: 10px; margin-bottom: 9px; padding-bottom: 7px; border-bottom: 1px solid var(--line); break-inside: avoid; font-size: 10pt; font-weight: 600; }
+    .toc li span { color: var(--accent); font: 600 9pt 'JetBrains Mono', monospace; }
+    .toc li small { display: block; color: var(--muted); font-weight: 400; font-size: 8.2pt; }
+
+    /* cover */
+    .cover { position: relative; height: 297mm; padding: 18mm 16mm 16mm; overflow: hidden; color: #f2f0e9; background: #0d0d0c; break-after: page; }
+    .cover__top { display: flex; justify-content: space-between; color: #f2f0e999; font: 600 7.5pt/1 'JetBrains Mono', monospace; letter-spacing: 0.16em; text-transform: uppercase; }
+    .cover h1 { margin: 22mm 0 6mm; font-size: 62pt; font-weight: 800; letter-spacing: -0.06em; line-height: 0.9; }
+    .cover h1 span { color: var(--accent); }
+    .cover__sub { max-width: 140mm; margin: 0 0 10mm; color: #f2f0e9cc; font-size: 12.5pt; line-height: 1.5; }
+    .cover__shot { width: 100%; height: 92mm; object-fit: cover; object-position: top; border-radius: 8px; border: 1px solid #ffffff1f; }
+    .cover dl { position: absolute; left: 16mm; right: 16mm; bottom: 16mm; display: grid; grid-template-columns: 38mm 1fr 38mm 1fr; gap: 8px 10px; margin: 0; padding-top: 14px; border-top: 1px solid #f2f0e94d; font-size: 9pt; }
+    .cover dt { color: #f2f0e980; font: 600 7pt/1.8 'JetBrains Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; }
+    .cover dd { margin: 0; }
+    .cover a { color: #f2f0e9; }
+    .blank { display: inline-block; min-width: 40mm; border-bottom: 1px solid #f2f0e980; }
+
+    .diagram { margin: 6px 0 14px; padding: 12px; background: var(--paper); border-radius: 8px; break-inside: avoid; }
+    .diagram svg { display: block; width: 100%; height: auto; }
+    .cover h1 span { color: #8fb8ee; }
+    .t-map tbody th { width: 46%; }
+    .t-map td.where { width: 22%; color: var(--accent); font: 600 7.6pt 'JetBrains Mono', monospace; }
+    .walk { grid-template-columns: 1fr; gap: 2px; break-inside: auto; margin-bottom: 10px; }
+    .walk pre { margin-bottom: 4px; font-size: 7pt; }
+    .walk > div { columns: 2; column-gap: 12px; }
+    pre, code { font-variant-ligatures: none; }
+    pre.term { color: #e6e9f2; background: #1d2b36; }
+    table.num td, table.num th { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+
+<section class="cover">
+    <div class="cover__top"><span>CSE274 · Applied Machine Learning</span><span>Project report</span></div>
+    <h1>Irri<span>gate</span></h1>
+    <p class="cover__sub">Applied machine learning on a real Kaggle competition, from raw data to a new submission. Six notebooks, one per unit, take my first entry (balanced accuracy 0.960) through leakage-safe pre-processing, engineered features, every classifier in the syllabus, regression, ensembles and clustering, to a model that scores 0.9713 on Kaggle's hidden labels.</p>
+    <img class="cover__shot" src="figures/site-home.png" alt="">
+    <dl>
+        <dt>Student</dt><dd>Lukshya Singh Supyal</dd>
+        <dt>Registration no.</dt><dd><span class="blank">&nbsp;</span></dd>
+        <dt>Programme</dt><dd>B.Tech CSE, Semester 5</dd>
+        <dt>Course</dt><dd>CSE274 Applied Machine Learning (L:2 T:0 P:2, 3 credits)</dd>
+        <dt>Website</dt><dd><a href="https://lushadowx.github.io/Irrigate/">lushadowx.github.io/Irrigate</a></dd>
+        <dt>Source code</dt><dd><a href="https://github.com/LuShadowX/Irrigate">github.com/LuShadowX/Irrigate</a></dd>
+    </dl>
+</section>
+
+<section>
+    <p class="kicker">Contents</p>
+    <h2>What's in this report</h2>
+    <ol class="toc">
+        <li><span>01</span><div>Project overview<small>The competition and the result</small></div></li>
+        <li><span>02</span><div>How it's built<small>Package, notebooks, site</small></div></li>
+        <li><span>03</span><div>Unit I<small>Data pre-processing</small></div></li>
+        <li><span>04</span><div>Unit II<small>Features and dimensionality</small></div></li>
+        <li><span>05</span><div>Unit III<small>Classification models</small></div></li>
+        <li><span>06</span><div>Unit IV<small>Regression</small></div></li>
+        <li><span>07</span><div>Unit V<small>Ensembles and the final model</small></div></li>
+        <li><span>08</span><div>Unit VI<small>Unsupervised learning</small></div></li>
+        <li><span>09</span><div>Syllabus mapping<small>All 50 topics</small></div></li>
+        <li><span>10</span><div>Code walkthrough<small>The important parts</small></div></li>
+        <li><span>11</span><div>Testing<small>What was checked</small></div></li>
+        <li><span>12</span><div>Deployment and conclusion<small>Site, Kaggle, what I learned</small></div></li>
+    </ol>
+    <div class="note" style="margin-top:14px">Every figure and number in this report comes from executing the notebooks and the training script on the real data; the Kaggle scores are the ones Kaggle reported for my two submissions. Code extracts are copied from the source files with their file names and line numbers.</div>
+    <h3>Course and scope</h3>
+    <p>The project follows the CSE274 syllabus as published unit by unit on the university notes site: Data Pre-processing; Feature Engineering and Dimensionality Reduction; Linear and Probabilistic Classification Models; Regression; Ensemble Learning; Unsupervised Learning. Each unit has one notebook, and chapter 09 maps all 50 listed topics to the section that covers them. The course page gives a course description rather than numbered outcomes, and chapter 09 maps each statement of that description too. The course's continuous assessment puts two thirds of its weight on a project that should "implement all the topics in a practical way"; this is that project.</p>
+</section>
+
+<section class="chapter">
+    <p class="kicker">01 · Project overview</p>
+    <h2>From my first submission to a model that beats it</h2>
+    <p class="lead">In April 2026 I entered Kaggle's Playground Series S6E4, <i>Predicting Irrigation Need</i>. My notebook one-hot encoded the features, trained an XGBoost classifier with 200 trees and predicted the most probable class. It scored a balanced accuracy of 0.96021 on the public leaderboard and 0.96077 on the private one, finishing 3,391st of 4,315. This project starts from that notebook and asks what each unit of the course would have changed.</p>
+    <div class="stats">
+        <div class="stat"><b>0.9713</b><span>new Kaggle private score (was 0.9608)</span></div>
+        <div class="stat"><b>6</b><span>notebooks, one per syllabus unit</span></div>
+        <div class="stat"><b>50</b><span>syllabus topics mapped</span></div>
+        <div class="stat"><b>2</b><span>real Kaggle datasets</span></div>
+    </div>
+    <h3>The data</h3>
+    <table>
+        <thead><tr><th>Item</th><th>Value</th></tr></thead>
+        <tbody>
+            <tr><th>Main dataset</th><td>Kaggle Playground Series S6E4: 630,000 labelled fields, 270,000 test fields; 11 numeric and 8 categorical features</td></tr>
+            <tr><th>Target and metric</th><td>Irrigation need (Low 58.7%, Medium 37.9%, High 3.3%), scored on <b>balanced accuracy</b>, the mean of per-class recall</td></tr>
+            <tr><th>Regression dataset</th><td>Kaggle <i>Crop Yield Prediction Dataset</i> (FAO and World Bank figures): 13,130 country–crop–year rows, 101 countries, 10 crops, 1990–2013</td></tr>
+        </tbody>
+    </table>
+    <h3>The result</h3>
+    <table class="num">
+        <thead><tr><th>Submission</th><th>CV balanced accuracy</th><th>Kaggle public</th><th>Kaggle private</th></tr></thead>
+        <tbody>
+            <tr><th>April 2026: one-hot XGBoost (200 trees), argmax</th><td>0.9617</td><td>0.96021</td><td>0.96077</td></tr>
+            <tr><th>October 2026: LightGBM + XGBoost blend, domain features, tuned decision weights</th><td>0.9702 (held-out fold)</td><td>0.96849</td><td>0.97068</td></tr>
+            <tr><th>October 2026, final: LightGBM + XGBoost + CatBoost blend, domain features, tuned decision weights</th><td>0.9703 (held-out fold)</td><td><b>0.96985</b></td><td><b>0.97126</b></td></tr>
+        </tbody>
+    </table>
+    <p>On the public leaderboard, the final 0.96985 would rank about 1,185th of 4,316 (the top 28%), where my April score would rank about 2,659th. The cross-validation predicted the improvement and was slightly cautious: +0.0086 on a held-out fold, against +0.0105 on Kaggle's private labels.</p>
+    <h3>Where the improvement came from</h3>
+    <ul>
+        <li><b>Matching the decision to the metric (Unit I, class imbalance).</b> Plain argmax maximises accuracy. Balanced accuracy weighs the 3.3% High class as much as Low, so per-class decision weights, tuned on out-of-fold predictions, take the final blend from 0.9622 to 0.9703 on a held-out fold.</li>
+        <li><b>Features and stronger models (Units II and V)</b> together added much less: engineered features as leak-free transformers, plus LightGBM, XGBoost and CatBoost with early stopping and soft voting, moved the argmax score only from 0.9617 to 0.9624. They matter more once the weights are tuned: the same weight tuning applied to my April model's own predictions reaches 0.9689 on the held-out fold, and with the better models 0.9703.</li>
+    </ul>
+</section>
+
+<section class="chapter">
+    <p class="kicker">02 · How it's built</p>
+    <h2>A package, six notebooks, one training script</h2>
+    <p class="lead">Every model in the project is a scikit-learn <code>Pipeline</code> built from the same small package, so pre-processing is refitted inside every cross-validation fold and nothing can leak. The full-scale training lives in a script, not a notebook, so it can be rerun with one command.</p>
+    <div class="diagram">
+        <svg viewBox="0 0 760 224" font-family="Inter, sans-serif" font-size="11">
+            <rect x="10" y="10" width="740" height="40" rx="10" fill="#2f6db5"/><text x="380" y="35" text-anchor="middle" fill="#fff" font-weight="700">notebooks/01 … 06, one per unit · executed end to end on the real data</text>
+            <rect x="10" y="62" width="176" height="56" rx="10" fill="#1d2b36"/><text x="98" y="86" text-anchor="middle" fill="#fff" font-weight="700">features.py</text><text x="98" y="104" text-anchor="middle" fill="#cbd5e1">domain · group stats · frequency</text>
+            <rect x="198" y="62" width="176" height="56" rx="10" fill="#1d2b36"/><text x="286" y="86" text-anchor="middle" fill="#fff" font-weight="700">preprocess.py</text><text x="286" y="104" text-anchor="middle" fill="#cbd5e1">encoders · scalers · pipelines</text>
+            <rect x="386" y="62" width="176" height="56" rx="10" fill="#1d2b36"/><text x="474" y="86" text-anchor="middle" fill="#fff" font-weight="700">decision.py · evaluate.py</text><text x="474" y="104" text-anchor="middle" fill="#cbd5e1">class weights · metrics · curves</text>
+            <rect x="574" y="62" width="176" height="56" rx="10" fill="#1d2b36"/><text x="662" y="86" text-anchor="middle" fill="#fff" font-weight="700">data.py · plotting.py</text><text x="662" y="104" text-anchor="middle" fill="#cbd5e1">both datasets · one figure style</text>
+            <rect x="10" y="130" width="740" height="36" rx="10" fill="#e76f51"/><text x="380" y="152" text-anchor="middle" fill="#fff" font-weight="700">submit.py · 630,000 rows · 5-fold LightGBM + XGBoost + CatBoost · blend · decision weights → Kaggle</text>
+            <rect x="10" y="176" width="740" height="36" rx="10" fill="#475569"/><text x="380" y="198" text-anchor="middle" fill="#fff" font-weight="700">tools/build_site.py → docs/ (GitHub Pages): overview, course map, every notebook as HTML</text>
+        </svg>
+    </div>
+    <h3>Files</h3>
+    <table>
+        <thead><tr><th>File</th><th>Job</th><th>Lines</th></tr></thead>
+        <tbody>
+            <tr><th><code>src/irrigate/features.py</code></th><td><code>DomainFeatures</code>, <code>GroupStats</code>, <code>FrequencyEncoder</code>: all fit/transform, so statistics come from the training fold only</td><td>76</td></tr>
+            <tr><th><code>src/irrigate/preprocess.py</code></th><td>the column transformer (one-hot, ordinal growth stage, scaling) and the pipelines used everywhere</td><td>37</td></tr>
+            <tr><th><code>src/irrigate/decision.py</code></th><td>per-class decision weights that maximise balanced accuracy</td><td>37</td></tr>
+            <tr><th><code>src/irrigate/evaluate.py</code></th><td>metric table, per-class report, confusion matrix, ROC and PR curves</td><td>63</td></tr>
+            <tr><th><code>src/irrigate/submit.py</code></th><td>full-data training, blending, weight tuning and checking, the Kaggle file, and a re-scoring of the April approach</td><td>177</td></tr>
+            <tr><th><code>src/irrigate/data.py</code></th><td>loading the competition data and the crop-yield data</td><td>96</td></tr>
+            <tr><th><code>tests/test_irrigate.py</code></th><td>leakage-safety of the transformers, pipelines end to end, the weight search</td><td>66</td></tr>
+        </tbody>
+    </table>
+</section>
+
+<section class="chapter">
+    <p class="kicker">02 · How it's built (continued)</p>
+    <h2>The notebooks on the website</h2>
+    <p class="lead">Each notebook is published with its code, outputs and figures, exactly as executed. These are screenshots of the site.</p>
+    <figure class="fig-short"><img src="figures/nb-01.png" alt=""><figcaption><b>Fig. 1</b> · <b>Notebook 01</b>, class imbalance: five strategies compared inside cross-validation.</figcaption></figure>
+    <figure class="fig-short"><img src="figures/nb-03.png" alt=""><figcaption><b>Fig. 2</b> · <b>Notebook 03</b>, the perceptron written from scratch and compared with scikit-learn's.</figcaption></figure>
+    <figure class="fig-short"><img src="figures/nb-05.png" alt=""><figcaption><b>Fig. 3</b> · <b>Notebook 05</b>, the final model: loading the training script's report and comparing it with the April approach.</figcaption></figure>
+    <figure class="fig-short"><img src="figures/nb-06.png" alt=""><figcaption><b>Fig. 4</b> · <b>Notebook 06</b>, distance metrics written from scratch and checked against SciPy.</figcaption></figure>
+    <figure class="fig-short"><img src="figures/site-map.png" alt=""><figcaption><b>Fig. 5</b> · <b>The course map</b> on the site, with the course-description statements and every topic linked to its section.</figcaption></figure>
+</section>
+
+<section class="chapter">
+    <p class="kicker">03 · Unit I</p>
+    <h2>Data pre-processing</h2>
+    <p class="lead">Unit I: the pre-processing pipeline, types of data, data leakage, missing values and their mechanisms, outliers, categorical encoding, scaling and normalisation, and class imbalance. The competition data is clean (no missing values or outliers), so where a technique needs a problem to fix, the problem is injected into a copy and the fix is scored against the known truth. <span class="tag">Notebook 01</span></p>
+    <h3>Data leakage, demonstrated twice</h3>
+    <table class="num">
+        <thead><tr><th>Experiment</th><th>Honest</th><th>Leaky</th></tr></thead>
+        <tbody>
+            <tr><th>Target leakage: a "water scheduled" column computed from the label</th><td>0.606</td><td>0.924</td></tr>
+            <tr><th>Selecting 20 of 2,000 pure-noise features on <i>all</i> rows before cross-validation (chance = 0.333)</th><td>0.330</td><td>0.490</td></tr>
+        </tbody>
+    </table>
+    <p>Both leaky scores look like real signal, and both would collapse in production. The prevention is the same in both cases: split first, and put every fitted step inside the pipeline.</p>
+    <h3>Missing values</h3>
+    <p>20% of soil-moisture readings were removed under each mechanism. Under MCAR and MAR the remaining mean stays close to the truth (37.21 and 37.40, against 37.27); under MNAR (probes failing in dry soil) it drifts to 41.23, and nothing in the remaining data reveals it. Mean, median, k-NN and iterative imputation all reach a similar RMSE (about 16.4 under MCAR), because moisture is independent of the other features, and all are worse under MNAR (about 22). Adding a missing-value indicator lets the model use the fact that a reading is missing: 0.9089 → 0.9124 balanced accuracy.</p>
+    <h3>Outliers</h3>
+    <table class="num">
+        <thead><tr><th>Detector</th><th>Broken probe</th><th>Fahrenheit</th><th>Impossible combination</th><th>False alarms</th></tr></thead>
+        <tbody>
+            <tr><th>IQR rule</th><td>20 / 20</td><td>19 / 20</td><td>0 / 20</td><td>0</td></tr>
+            <tr><th>|z| &gt; 3</th><td>20 / 20</td><td>20 / 20</td><td>0 / 20</td><td>0</td></tr>
+            <tr><th>Isolation Forest</th><td>0 / 20</td><td>0 / 20</td><td>1 / 20</td><td>59</td></tr>
+            <tr><th>Local Outlier Factor</th><td>20 / 20</td><td>20 / 20</td><td>3 / 20</td><td>17</td></tr>
+        </tbody>
+    </table>
+    <p>Isolation Forest fails here for a reason worth knowing: each split uses a random feature, so with 11 flat, uniform-looking features a fault in one column is rarely isolated, while ordinary fields at the edges of the ranges are isolated just as quickly. "99% humidity with 2 mm of rain" defeats every detector, because each value is normal on its own; a domain rule would catch all of them.</p>
+    <div class="grid2">
+        <figure class=""><img src="figures/i01-outliers.png" alt=""><figcaption><b>Fig. 6</b> · <b>Treatment by capping</b> at the 1st and 99th percentiles of the clean data.</figcaption></figure>
+        <figure class=""><img src="figures/i01-scaling.png" alt=""><figcaption><b>Fig. 7</b> · <b>Scaling.</b> Unscaled, rainfall (range 2,500) dominates every distance.</figcaption></figure>
+    </div>
+    <h3>Encoding and scaling</h3>
+    <p>With a tree model, one-hot (0.9494), ordinal codes (0.9492) and frequency encoding (0.9480) work almost equally well. Frequency is slightly behind because every crop covers about a sixth of the fields. Scaling doesn't matter to a tree (0.9438 every time) but matters to k-NN, and not in the obvious direction. Standardising gives 0.632 and no scaling 0.570, but min-max gives only 0.494: it squeezes the numeric features into the same [0, 1] range as the 35 mostly irrelevant one-hot columns.</p>
+    <h3>Class imbalance</h3>
+    <figure class="fig-short"><img src="figures/i01-imbalance.png" alt=""><figcaption><b>Fig. 8</b> · <b>Imbalance fixes, by class.</b> Every fix trades some Low and Medium recall for High recall. Threshold moving gives the best balanced accuracy (0.9571, against 0.9499 for plain argmax) and is the fix used in the final model.</figcaption></figure>
+</section>
+
+<section class="chapter">
+    <p class="kicker">04 · Unit II</p>
+    <h2>Feature engineering and dimensionality reduction</h2>
+    <p class="lead">Unit II: filter, wrapper and embedded feature selection; feature extraction, creating new features and aggregation features; the curse of dimensionality; PCA and LDA. <span class="tag">Notebook 02</span></p>
+    <div class="grid2">
+        <figure class=""><img src="figures/i02-filter.png" alt=""><figcaption><b>Fig. 9</b> · <b>Filter methods:</b> ANOVA F, mutual information and χ² agree on moisture, mulching, wind, temperature and rainfall.</figcaption></figure>
+        <figure class=""><img src="figures/i02-k-features.png" alt=""><figcaption><b>Fig. 10</b> · <b>How many features?</b> The top 6 give the best score (0.953); all 40 give 0.921.</figcaption></figure>
+    </div>
+    <p>The filters miss one important feature, growth stage. Its code runs from Sowing (0) to Harvest (3), but only the middle two stages need water, so a one-feature-at-a-time score underrates it. The random forest ranks it second (impurity importance 0.25; permutation importance 0.28). RFE and forward selection pick similar sets of 8, and an L1 penalty keeps 34 of 40.</p>
+    <h3>Creating features</h3>
+    <table class="num">
+        <thead><tr><th>Features</th><th>Logistic regression</th><th>Gradient boosting</th></tr></thead>
+        <tbody>
+            <tr><th>raw</th><td>0.6268</td><td>0.9511</td></tr>
+            <tr><th>+ domain features</th><td>0.8054</td><td>0.9529</td></tr>
+            <tr><th>+ domain + aggregation</th><td>0.8055</td><td>0.9561</td></tr>
+        </tbody>
+    </table>
+    <p>The domain features (dryness, evaporation drive, thirsty stage, no mulch and their product, low rain) lift the linear model by 18 points, because they give it the interactions it cannot build on its own. Gradient boosting gains less, because its splits already find interactions. The lesson: <b>feature engineering matters most for simple models</b>. Mean dryness rises from 0.67 (Low) to 1.31 (Medium) to 2.24 (High).</p>
+    <div class="grid2">
+        <figure class=""><img src="figures/i02-curse.png" alt=""><figcaption><b>Fig. 11</b> · <b>Curse of dimensionality:</b> distances concentrate as dimensions grow, and k-NN drowns in noise columns.</figcaption></figure>
+        <figure class=""><img src="figures/i02-lda.png" alt=""><figcaption><b>Fig. 12</b> · <b>LDA projection.</b> LD 1 is −0.93·moisture + 0.51·wind + 0.50·temperature: the dryness direction, found automatically.</figcaption></figure>
+    </div>
+    <p>PCA can't compress this data: every component explains about 1/11 of the variance, because the features are independent. LDA's two components beat all 11 raw features as input to k-NN (0.560 against 0.509), and PCA's two lose (0.483), because PCA never looks at the labels.</p>
+</section>
+
+<section class="chapter">
+    <p class="kicker">05 · Unit III</p>
+    <h2>Linear and probabilistic classification models</h2>
+    <p class="lead">Unit III: supervised learning, the perceptron and logistic regression, Naive Bayes, k-nearest neighbours, decision trees, support vector machines, and evaluation with the confusion matrix, precision, recall, F1, ROC and precision–recall curves. Every model uses the same 40,000 training fields and 20,000 test fields. <span class="tag">Notebook 03</span></p>
+    <p><b>The perceptron</b>, written from scratch for the binary "needs water" task, never stops making mistakes (about 5,300 per epoch): the classes are not linearly separable. It still reaches 88.4% test accuracy, against 86.2% for scikit-learn's version. <b>Logistic regression</b>'s coefficients read like the EDA: for High, −3.13 on moisture, +2.07 on thirsty stage and +1.37 on temperature. <b>Naive Bayes</b> learned High fields as about 1.2 SD drier and 0.9 SD hotter than average.</p>
+    <div class="grid2">
+        <figure class=""><img src="figures/i03-tree.png" alt=""><figcaption><b>Fig. 13</b> · <b>The top of a decision tree.</b> Its first questions are the EDA findings: soil moisture ≤ 25%, then rainfall and growth stage, then temperature above 30 °C.</figcaption></figure>
+        <figure class=""><img src="figures/i03-knn.png" alt=""><figcaption><b>Fig. 14</b> · <b>k-NN:</b> balanced accuracy against k.</figcaption></figure>
+    </div>
+    <table class="num">
+        <thead><tr><th>Model (same split)</th><th>Balanced accuracy</th><th>High recall</th><th>ROC AUC</th><th>Train time</th></tr></thead>
+        <tbody>
+            <tr><th>Decision tree (depth 10)</th><td>0.9595</td><td>0.912</td><td>0.992</td><td>0.7 s</td></tr>
+            <tr><th>RBF SVM (12,000 fields)</th><td>0.8600</td><td>0.718</td><td>0.985</td><td>19.4 s</td></tr>
+            <tr><th>Gaussian Naive Bayes</th><td>0.8259</td><td>0.820</td><td>0.953</td><td>0.2 s</td></tr>
+            <tr><th>Logistic regression</th><td>0.8179</td><td>0.672</td><td>0.973</td><td>1.0 s</td></tr>
+            <tr><th>k-NN (k = 5)</th><td>0.6686</td><td>0.361</td><td>0.898</td><td>0.1 s</td></tr>
+            <tr><th>Linear SVM (12,000 fields)</th><td>0.6370</td><td>0.129</td><td>n/a</td><td>0.2 s</td></tr>
+        </tbody>
+    </table>
+    <div class="grid2">
+        <figure class=""><img src="figures/i03-confusion.png" alt=""><figcaption><b>Fig. 15</b> · <b>Confusion matrices</b> of three models, normalised by the true class.</figcaption></figure>
+        <figure class=""><img src="figures/i03-roc-pr.png" alt=""><figcaption><b>Fig. 16</b> · <b>ROC and precision–recall curves</b> of the decision tree; the dotted lines are the no-skill baselines.</figcaption></figure>
+    </div>
+    <p>The tree wins because its axis-aligned splits fit the thresholds in the data. Its High recall (0.91) and precision (0.94) are what the ensembles in Unit V build on.</p>
+</section>
+
+<section class="chapter">
+    <p class="kicker">06 · Unit IV</p>
+    <h2>Regression</h2>
+    <p class="lead">Unit IV: regression vs classification, bias and variance, simple and multiple linear regression, interpreting coefficients, polynomial features, Ridge, Lasso and Elastic Net, the effect of regularisation, tree-based regression and time-series regression. The irrigation target is a class, so this unit uses the second Kaggle dataset: crop yields. <span class="tag">Notebook 04</span></p>
+    <p><b>Regression vs classification.</b> Treating Low / Medium / High as 0 / 1 / 2 and rounding a regressor's output scores 0.954, slightly above the classifier's 0.945. Regression uses the order of the classes, and rounding at 0.5 and 1.5 happens to place the boundaries in a way that suits balanced accuracy. That foreshadows the decision-weight tuning in Unit V.</p>
+    <div class="grid2">
+        <figure class=""><img src="figures/i04-yield-eda.png" alt=""><figcaption><b>Fig. 17</b> · <b>Crop yields</b> against temperature, rainfall and pesticide use (log scale).</figcaption></figure>
+        <figure class=""><img src="figures/i04-bias-variance.png" alt=""><figcaption><b>Fig. 18</b> · <b>Bias and variance:</b> polynomial degree for wheat yield; cross-validated error rises sharply at degree 12.</figcaption></figure>
+    </div>
+    <h3>Linear models and their coefficients</h3>
+    <p>For wheat, simple linear regression gives yield = 5.215 − 0.130 × temperature (R² = 0.19), identical by hand and in statsmodels. Multiple regression on log-yield with rain, temperature, log pesticides and crop explains R² = 0.683. Each extra degree goes with 2.3% less yield, holding the rest fixed. Pesticide use goes with more yield (+11.7% per unit of log pesticides), which is an association with intensive farming, not a dose effect. Adding temperature² implies an optimum average temperature of 24 °C and lowers the AIC from 25,385 to 25,194.</p>
+    <figure class="fig-short"><img src="figures/i04-regularisation.png" alt=""><figcaption><b>Fig. 19</b> · <b>Regularisation.</b> Ridge and Lasso coefficient paths on 43 expanded features, and cross-validated R² on countries never seen in training.</figcaption></figure>
+    <table class="num">
+        <thead><tr><th>Model (CV by country)</th><th>CV R²</th><th>Non-zero coefficients</th></tr></thead>
+        <tbody>
+            <tr><th>OLS, no penalty</th><td>0.644</td><td>43</td></tr>
+            <tr><th>Ridge, λ = 10</th><td>0.646</td><td>43</td></tr>
+            <tr><th>Lasso, λ = 0.005</th><td>0.684</td><td>32</td></tr>
+            <tr><th>Elastic Net</th><td>0.674</td><td>33</td></tr>
+        </tbody>
+    </table>
+    <p><b>Tree-based regression</b> gave a result that goes against the usual expectation. On unseen countries, linear regression with crop dummies (R² 0.673) beats gradient boosting (0.657), random forest (0.630) and a single tree (0.615). Trees predict averages of training boxes, so they can't extrapolate to a country outside what they saw. What you validate on decides what "best" means.</p>
+    <figure class="fig-short"><img src="figures/i04-timeseries.png" alt=""><figcaption><b>Fig. 20</b> · <b>Time-series regression:</b> forecasting 2008–2013 from 1990–2007. Mean MAE: trend 0.145, trend + AR(2) 0.154, naive 0.186 t/ha.</figcaption></figure>
+</section>
+
+<section class="chapter">
+    <p class="kicker">07 · Unit V</p>
+    <h2>Ensemble learning and the final model</h2>
+    <p class="lead">Unit V: why ensembles work, majority voting, bagging and random forests, AdaBoost and gradient boosting, XGBoost, LightGBM and CatBoost, ensemble regression, and model evaluation and tuning: cross-validation strategies, pipelines and hyperparameter search. The unit ends with the final Kaggle submission. <span class="tag">Notebook 05</span></p>
+    <h3>Bias, variance and voting</h3>
+    <p>25 deep trees, each trained on a bootstrap sample, score 0.938 ± 0.003 on their own, and their majority vote scores 0.959: averaging removes variance. Voting across <i>different</i> models works only if they are comparably good. Here the tree (0.960) is far ahead of logistic regression, Naive Bayes and k-NN, so hard voting (0.799) and soft voting (0.885) both drag it down.</p>
+    <table class="num">
+        <thead><tr><th>Bagged deep trees</th><th>1</th><th>5</th><th>10</th><th>25</th><th>50</th><th>100</th></tr></thead>
+        <tbody>
+            <tr><th>Test balanced accuracy</th><td>0.939</td><td>0.953</td><td>0.954</td><td>0.960</td><td>0.960</td><td>0.960</td></tr>
+            <tr><th>Out-of-bag accuracy</th><td>–</td><td>–</td><td>0.973</td><td>0.980</td><td>0.982</td><td>0.982</td></tr>
+        </tbody>
+    </table>
+    <figure class="fig-short"><img src="figures/i05-boundaries.png" alt=""><figcaption><b>Fig. 21</b> · <b>Decision surfaces with <code>DecisionBoundaryDisplay</code></b>, the tool my merged scikit-learn pull request #34556 (July 2026) brought into scikit-learn's own random-forest example. A single tree's surface has small islands (variance); the forest and the boosted models smooth them.</figcaption></figure>
+    <div class="grid2">
+        <figure class=""><img src="figures/i05-boosting.png" alt=""><figcaption><b>Fig. 22</b> · <b>Boosting round by round:</b> AdaBoost with depth-2 trees and gradient boosting with depth-3 trees.</figcaption></figure>
+        <div>
+            <h3>The three libraries (40,000 fields)</h3>
+            <table class="num">
+                <thead><tr><th>Library</th><th>Balanced acc.</th><th>High recall</th><th>Seconds</th></tr></thead>
+                <tbody>
+                    <tr><th>CatBoost</th><td>0.9604</td><td>0.915</td><td>3.8</td></tr>
+                    <tr><th>XGBoost</th><td>0.9583</td><td>0.909</td><td>4.7</td></tr>
+                    <tr><th>LightGBM</th><td>0.9580</td><td>0.907</td><td>18.1</td></tr>
+                </tbody>
+            </table>
+            <p>All three are within 0.003 of each other and, with default settings on 40,000 fields, no better than notebook 03's single tree (0.9595). Their value shows at scale: all 630,000 rows, early stopping and blending.</p>
+        </div>
+    </div>
+    <h3>Evaluation and tuning</h3>
+    <p><b>Cross-validation strategy matters.</b> In 10-fold plain k-fold on 3,000 fields, the share of High fields per fold swings from 2.0% to 5.0%; stratified k-fold keeps every fold at 3.33%. <b>Pipelines</b> make every fitted step part of the model, so cross-validation refits all of them. <b>Tuning</b> on the same LightGBM pipeline: grid search (18 combinations) found the best score, 0.9520 in 236 s; random search reached 0.9518 in 380 s; successive halving (54 candidates) reached 0.9474 in 780 s, because its early rounds rank candidates on only 2,000 fields. <b>Ensemble regression</b> on the crop-yield data doesn't overturn notebook 04: on unseen countries Ridge (0.673) still beats every ensemble, and the voting regressor scores 0.662.</p>
+</section>
+
+<section>
+    <h3>The final submission</h3>
+    <p><code>python -m irrigate.submit</code> trains LightGBM, XGBoost and CatBoost on all 630,000 fields with 5-fold stratified cross-validation and early stopping, averages their probabilities (soft voting), and tunes per-class decision weights for balanced accuracy. The weights are tuned on four folds' out-of-fold predictions and checked on the fifth. The same script re-scores my April approach with the same folds.</p>
+    <table class="num">
+        <thead><tr><th>Model (5-fold CV on 630,000 fields)</th><th>Balanced accuracy</th></tr></thead>
+        <tbody>
+            <tr><th>April 2026 approach: one-hot XGBoost, 200 trees, argmax</th><td>0.96169</td></tr>
+            <tr><th>LightGBM, argmax (867–981 trees per fold)</th><td>0.96206</td></tr>
+            <tr><th>XGBoost, argmax (827–935 trees)</th><td>0.96199</td></tr>
+            <tr><th>CatBoost, argmax (2,452–2,996 trees)</th><td>0.96124</td></tr>
+            <tr><th>Blend of all three, argmax</th><td>0.96236</td></tr>
+            <tr><th>Blend + decision weights (1, 0.52, 8.4), on the held-out fold</th><td><b>0.97033</b></td></tr>
+        </tbody>
+    </table>
+    <div class="grid2">
+        <figure class=""><img src="figures/i05-final.png" alt=""><figcaption><b>Fig. 23</b> · <b>From the April approach to the final model</b>, cross-validated.</figcaption></figure>
+        <figure class=""><img src="figures/i05-final-confusion.png" alt=""><figcaption><b>Fig. 24</b> · <b>Where the gain comes from.</b> High recall rises from 0.916 to 0.962; truly High fields called Medium fall from 8.4% to 3.8%, at the cost of Medium fields called High rising from 0.3% to 2.0%.</figcaption></figure>
+    </div>
+    <p>The ensembles alone add only 0.0007 over the April model with argmax. Most of the improvement comes from choosing the decision rule to match the metric: tuning the same weights on my April model's own predictions already reaches 0.9689 on the held-out fold. The better features and models add the rest, up to 0.9703. On Kaggle's hidden labels the final model scores <b>0.96985 public and 0.97126 private</b>, against 0.96021 and 0.96077 in April (chapter 01).</p>
+</section>
+
+
+<section class="chapter">
+    <p class="kicker">08 · Unit VI</p>
+    <h2>Unsupervised learning</h2>
+    <p class="lead">Unit VI: the role of unsupervised learning, distance metrics, K-Means and K-Medoids, hierarchical clustering, DBSCAN, anomaly detection, and evaluating clusters. The labels are put aside. <span class="tag">Notebook 06</span></p>
+    <p><b>Distances.</b> Euclidean, Manhattan and cosine distance are written from scratch and match SciPy to six decimals. These are the same metrics as in <code>sentence-transformers</code>, where my pull request #3906 (merged, August 2026) made Euclidean and Manhattan similarity work with mixed sparse and dense inputs. On 1,000 fields, Euclidean and Manhattan pick the same nearest neighbour 80% of the time, and cosine only 48%.</p>
+    <div class="grid2">
+        <figure class=""><img src="figures/i06-elbow.png" alt=""><figcaption><b>Fig. 25</b> · <b>Choosing k:</b> no sharp elbow or silhouette peak; the features are flat and independent.</figcaption></figure>
+        <figure class=""><img src="figures/i06-dendrograms.png" alt=""><figcaption><b>Fig. 26</b> · <b>Dendrograms</b> with four linkage criteria. Cut into four, single linkage gives one cluster of 397 and three singletons; Ward gives 111, 111, 90 and 88.</figcaption></figure>
+    </div>
+    <p><b>K-Means</b>, written from scratch, reaches an inertia of 29,068 in 74 iterations from one start; scikit-learn's best of 10 starts reaches 28,706. The four segments it finds without labels differ strongly in need: the dry, windy segment is 12.4% High, the cool, calm one 0.0%. <b>K-Medoids</b> (PAM), also from scratch, with Manhattan distance on data with 15 scattered extreme outliers, keeps all four centres on ordinary fields (largest coordinate 1.19), while K-Means' centres are dragged out to 15.75.</p>
+    <figure class="fig-short"><img src="figures/i06-dbscan.png" alt=""><figcaption><b>Fig. 27</b> · <b>DBSCAN:</b> core, border and noise points among the High fields; K-Means cuts straight across two moons, DBSCAN follows them.</figcaption></figure>
+    <table class="num">
+        <thead><tr><th>Anomaly detector (50 injected faults)</th><th>ROC AUC</th><th>Precision at 50</th></tr></thead>
+        <tbody>
+            <tr><th>Distance to nearest K-Means centre</th><td>0.987</td><td>0.66</td></tr>
+            <tr><th>Local Outlier Factor</th><td>0.994</td><td>0.64</td></tr>
+            <tr><th>Isolation Forest</th><td>0.891</td><td>0.12</td></tr>
+        </tbody>
+    </table>
+    <p>An Isolation Forest also drove anomaly detection in the <i>AI-Powered Process Performance Analyzer</i>, a team project led by Mayank149 to which I contributed a refactor of its anomaly module.</p>
+    <table class="num">
+        <thead><tr><th>Clustering (k = 4)</th><th>Inertia</th><th>Silhouette</th><th>Davies–Bouldin</th><th>ARI with labels</th></tr></thead>
+        <tbody>
+            <tr><th>K-Means</th><td>11,920</td><td>0.194</td><td>1.537</td><td>0.078</td></tr>
+            <tr><th>Agglomerative, Ward</th><td>13,288</td><td>0.135</td><td>1.730</td><td>0.065</td></tr>
+            <tr><th>Agglomerative, single</th><td>19,951</td><td>0.054</td><td>0.632</td><td>0.001</td></tr>
+        </tbody>
+    </table>
+    <p>Single linkage is the cautionary row. Its useless one-giant-cluster result gets the <i>best</i> Davies–Bouldin score, because a few far-away singletons look well separated, but its silhouette gives it away. Use more than one measure, and look at the cluster sizes.</p>
+</section>
+
+<section class="chapter">
+    <p class="kicker">09 · Syllabus mapping</p>
+    <h2>Every topic of the syllabus</h2>
+    <p class="lead">Generated from <code>tools/syllabus.py</code>, the same file that builds the course map on the website.</p>
+    <h3>The course description</h3>
+    <p>The course page has no numbered course outcomes. Its description says that students learn to:</p>
+    <table class="t-map"><thead><tr><th>Statement</th><th>Students learn to …</th><th>Where</th></tr></thead><tbody><tr><th>D1</th><td>explain types of data and data pre-processing concepts</td><td class="where">notebook 01</td></tr><tr><th>D2</th><td>apply feature engineering</td><td class="where">notebook 02</td></tr><tr><th>D3</th><td>use dimensionality reduction techniques</td><td class="where">notebook 02</td></tr><tr><th>D4</th><td>compare and implement nonlinear (classification) models with appropriate evaluation metrics</td><td class="where">notebook 03</td></tr><tr><th>D5</th><td>compare and implement regression models with appropriate evaluation metrics</td><td class="where">notebook 04</td></tr><tr><th>D6</th><td>compare and implement ensemble models with appropriate evaluation metrics</td><td class="where">notebook 05</td></tr><tr><th>D7</th><td>compare and implement clustering models with appropriate evaluation metrics</td><td class="where">notebook 06</td></tr></tbody></table>
+    <h3>Unit I: Data Pre-processing <span class="tag">8 topics</span></h3><p style="font-size:8.5pt;color:var(--muted)">Notebook <code>01_preprocessing.ipynb</code> · Data pre-processing</p><table class="t-map"><thead><tr><th>Syllabus topic</th><th>Where</th></tr></thead><tbody><tr><th>Introduction to data and the pre-processing pipeline</th><td class="where">01 § 1</td></tr><tr><th>Types of data: qualitative, quantitative, structured vs unstructured</th><td class="where">01 § 2</td></tr><tr><th>Data leakage: causes and prevention</th><td class="where">01 § 3</td></tr><tr><th>Missing values: mechanisms (MCAR, MAR, MNAR) and handling techniques</th><td class="where">01 § 4</td></tr><tr><th>Outliers: detection and treatment</th><td class="where">01 § 5</td></tr><tr><th>Categorical data: one-hot, label (ordinal), frequency encoding</th><td class="where">01 § 6</td></tr><tr><th>Standardisation (z-score) and min-max normalisation</th><td class="where">01 § 7</td></tr><tr><th>Class imbalance: resampling, SMOTE, algorithmic approaches</th><td class="where">01 § 8</td></tr></tbody></table><h3>Unit II: Feature Engineering and Dimensionality Reduction <span class="tag">8 topics</span></h3><p style="font-size:8.5pt;color:var(--muted)">Notebook <code>02_features_dimensionality.ipynb</code> · Feature engineering and dimensionality reduction</p><table class="t-map"><thead><tr><th>Syllabus topic</th><th>Where</th></tr></thead><tbody><tr><th>Feature selection: filter methods</th><td class="where">02 § 1A</td></tr><tr><th>Feature selection: wrapper methods</th><td class="where">02 § 1B</td></tr><tr><th>Feature selection: embedded methods</th><td class="where">02 § 1C</td></tr><tr><th>Feature extraction and creating new features</th><td class="where">02 § 2A–2B</td></tr><tr><th>Aggregation features</th><td class="where">02 § 2C</td></tr><tr><th>Curse of dimensionality; dimensionality reduction</th><td class="where">02 § 3</td></tr><tr><th>Principal component analysis (PCA)</th><td class="where">02 § 4A</td></tr><tr><th>Linear discriminant analysis (LDA); PCA vs LDA</th><td class="where">02 § 4B</td></tr></tbody></table><h3>Unit III: Linear &amp; Probabilistic Classification Models <span class="tag">9 topics</span></h3><p style="font-size:8.5pt;color:var(--muted)">Notebook <code>03_classification.ipynb</code> · Linear and probabilistic classification models</p><table class="t-map"><thead><tr><th>Syllabus topic</th><th>Where</th></tr></thead><tbody><tr><th>Introduction to supervised learning</th><td class="where">03 § 1</td></tr><tr><th>Perceptron (from scratch)</th><td class="where">03 § 2.1</td></tr><tr><th>Logistic regression</th><td class="where">03 § 2.2</td></tr><tr><th>Naïve Bayes classifier</th><td class="where">03 § 3.1</td></tr><tr><th>K-nearest neighbours</th><td class="where">03 § 4.1</td></tr><tr><th>Decision tree</th><td class="where">03 § 4.2</td></tr><tr><th>Support vector machine (linear and RBF)</th><td class="where">03 § 4.3</td></tr><tr><th>Confusion matrix and basic metrics</th><td class="where">03 § 5.1–5.2</td></tr><tr><th>ROC and precision–recall curves</th><td class="where">03 § 5.3</td></tr></tbody></table><h3>Unit IV: Regression <span class="tag">10 topics</span></h3><p style="font-size:8.5pt;color:var(--muted)">Notebook <code>04_regression.ipynb</code> · Regression</p><table class="t-map"><thead><tr><th>Syllabus topic</th><th>Where</th></tr></thead><tbody><tr><th>Regression vs classification</th><td class="where">04 § 1</td></tr><tr><th>Bias–variance considerations in regression</th><td class="where">04 § 2</td></tr><tr><th>Simple linear regression</th><td class="where">04 § 3</td></tr><tr><th>Multiple linear regression</th><td class="where">04 § 4</td></tr><tr><th>Interpretation of coefficients</th><td class="where">04 § 5</td></tr><tr><th>Polynomial feature expansion</th><td class="where">04 § 6</td></tr><tr><th>Ridge, Lasso and Elastic Net</th><td class="where">04 § 7</td></tr><tr><th>Effect of regularisation on model complexity</th><td class="where">04 § 8</td></tr><tr><th>Tree-based regression models</th><td class="where">04 § 9</td></tr><tr><th>Time-series regression models</th><td class="where">04 § 10</td></tr></tbody></table><h3>Unit V: Ensemble Learning <span class="tag">8 topics</span></h3><p style="font-size:8.5pt;color:var(--muted)">Notebook <code>05_ensembles_final_model.ipynb</code> · Ensemble learning, tuning and the final submission</p><table class="t-map"><thead><tr><th>Syllabus topic</th><th>Where</th></tr></thead><tbody><tr><th>Introduction; bias–variance trade-off in ensembles</th><td class="where">05 § 1</td></tr><tr><th>Majority voting classifier: hard and soft voting</th><td class="where">05 § 2</td></tr><tr><th>Bagging and random forest</th><td class="where">05 § 3</td></tr><tr><th>AdaBoost and gradient boosting machines</th><td class="where">05 § 4</td></tr><tr><th>XGBoost, LightGBM, CatBoost</th><td class="where">05 § 5</td></tr><tr><th>Ensemble regression models</th><td class="where">05 § 6</td></tr><tr><th>Cross-validation strategies, pipelines, hyperparameter tuning</th><td class="where">05 § 7</td></tr><tr><th>Final model and Kaggle submission</th><td class="where">05 § 8–9</td></tr></tbody></table><h3>Unit VI: Unsupervised Learning <span class="tag">7 topics</span></h3><p style="font-size:8.5pt;color:var(--muted)">Notebook <code>06_unsupervised.ipynb</code> · Unsupervised learning</p><table class="t-map"><thead><tr><th>Syllabus topic</th><th>Where</th></tr></thead><tbody><tr><th>Role of unsupervised learning; supervised vs unsupervised</th><td class="where">06 § 1</td></tr><tr><th>Distance metrics: Euclidean, Manhattan, cosine; choosing a metric</th><td class="where">06 § 2</td></tr><tr><th>K-Means and K-Medoids (PAM)</th><td class="where">06 § 3</td></tr><tr><th>Hierarchical clustering: types, dendrogram, linkage criteria</th><td class="where">06 § 4</td></tr><tr><th>Density-based clustering (DBSCAN)</th><td class="where">06 § 5</td></tr><tr><th>Anomaly detection</th><td class="where">06 § 6</td></tr><tr><th>Evaluating clusters: inertia, silhouette, Davies–Bouldin</th><td class="where">06 § 7</td></tr></tbody></table>
+</section>
+
+<section class="chapter">
+    <p class="kicker">10 · Code walkthrough</p>
+    <h2>The important parts</h2>
+    <h3>Leak-free features</h3>
+    <div class="walk">
+        <pre><span class="file">features.py · lines 15–26</span>def domain_features(df: pd.DataFrame, rain_cut: float) -&gt; pd.DataFrame:
+    &quot;&quot;&quot;Row-wise features from agronomy. Apart from rain_cut (learned on training data)
+    they use one row at a time, so they can&#x27;t leak.&quot;&quot;&quot;
+    out = pd.DataFrame(index=df.index)
+    out[&quot;dryness&quot;] = df[&quot;Temperature_C&quot;] / df[&quot;Soil_Moisture&quot;]
+    out[&quot;evaporation_drive&quot;] = df[&quot;Temperature_C&quot;] * df[&quot;Wind_Speed_kmh&quot;]
+    out[&quot;water_supply&quot;] = df[&quot;Rainfall_mm&quot;] / 1000 + df[&quot;Previous_Irrigation_mm&quot;] / 100
+    out[&quot;thirsty_stage&quot;] = df[&quot;Crop_Growth_Stage&quot;].isin(WATER_STAGES).astype(int)
+    out[&quot;no_mulch&quot;] = (df[&quot;Mulching_Used&quot;] == &quot;No&quot;).astype(int)
+    out[&quot;exposed_thirsty&quot;] = out[&quot;thirsty_stage&quot;] * out[&quot;no_mulch&quot;]
+    out[&quot;low_rain&quot;] = (df[&quot;Rainfall_mm&quot;] &lt; rain_cut).astype(int)
+    return out</pre>
+        <div>
+            <p>Each feature has an agronomic reason and comes from one row at a time, except the low-rain cut-off, which is a statistic of the data. If it were computed on all rows, validation rows would shape a training feature. So it is learned in <code>DomainFeatures.fit()</code>, on the training fold only, and passed in.</p>
+            <p>The test suite checks this directly: a test set with very wet fields keeps the cut-off from the training data.</p>
+        </div>
+    </div>
+    <pre><span class="file">features.py · lines 40–60</span>class GroupStats(BaseEstimator, TransformerMixin):
+    &quot;&quot;&quot;Aggregation features: each field compared with the average field of its group
+    (e.g. its crop type), using means learned on the training data only.&quot;&quot;&quot;
+
+    def __init__(self, groups=(&quot;Crop_Type&quot;, &quot;Region&quot;), columns=(&quot;Soil_Moisture&quot;, &quot;Temperature_C&quot;)):
+        self.groups = groups
+        self.columns = columns
+
+    def fit(self, X, y=None):
+        self.means_ = {g: X.groupby(g)[list(self.columns)].mean() for g in self.groups}
+        self.global_ = X[list(self.columns)].mean()
+        return self
+
+    def transform(self, X):
+        X = X.copy()
+        for g in self.groups:
+            means = self.means_[g]
+            for c in self.columns:
+                group_mean = X[g].map(means[c]).astype(float).fillna(self.global_[c])
+                X[f&quot;{c}_vs_{g}&quot;] = X[c] - group_mean
+        return X</pre>
+    <p><code>GroupStats</code> follows the same contract: group means are learned in <code>fit()</code> and only looked up in <code>transform()</code>, with the global mean as a fallback for a group never seen in training.</p>
+    <h3>Pipelines</h3>
+    <div class="walk">
+        <pre><span class="file">preprocess.py · lines 15–23</span>def column_transformer(scale=&quot;standard&quot;, numeric=None, engineered=False):
+    &quot;&quot;&quot;One-hot for nominal columns, ordinal codes for growth stage, scaling for numbers.&quot;&quot;&quot;
+    numeric = list(numeric or NUMERIC) + (ENGINEERED if engineered else [])
+    scaler = {&quot;standard&quot;: StandardScaler(), &quot;minmax&quot;: MinMaxScaler(), None: &quot;passthrough&quot;}[scale]
+    return ColumnTransformer([
+        (&quot;num&quot;, scaler, numeric),
+        (&quot;nominal&quot;, OneHotEncoder(handle_unknown=&quot;ignore&quot;, sparse_output=False), NOMINAL),
+        (&quot;stage&quot;, OrdinalEncoder(categories=[STAGE_ORDER]), [&quot;Crop_Growth_Stage&quot;]),
+    ], verbose_feature_names_out=False)</pre>
+        <div>
+            <p>One transformer, used in every notebook: one-hot for nominal columns (unknown categories ignored, not crashing), ordinal codes in the natural order for growth stage, and a choice of scaler for the numbers.</p>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h3>Decisions that match the metric</h3>
+    <div class="walk">
+        <pre><span class="file">decision.py · lines 24–37</span>def search_weights(proba, y, grid=None, rounds=3):
+    &quot;&quot;&quot;Coordinate search over per-class weights (the first class stays at 1).&quot;&quot;&quot;
+    grid = np.geomspace(0.2, 30, 80) if grid is None else grid
+    w = np.ones(proba.shape[1])
+    best = balanced_accuracy_score(y, decide(proba, w))
+    for _ in range(rounds):
+        for k in range(1, proba.shape[1]):
+            for g in grid:
+                trial = w.copy()
+                trial[k] = g
+                score = balanced_accuracy_score(y, decide(proba, trial))
+                if score &gt; best:
+                    best, w = score, trial
+    return w, best</pre>
+        <div>
+            <p>Argmax maximises accuracy. Multiplying each class's probability by a weight before the argmax moves the decision boundaries; a coordinate search over the weights maximises balanced accuracy. For the final blend the weights are 1 for Low, 0.52 for Medium and 8.4 for High: High wins far more often than its probability alone would allow.</p>
+            <p>Tuned weights can overfit the predictions they are tuned on, so <code>submit.py</code> tunes them on four folds and scores them on the fifth before trusting them.</p>
+        </div>
+    </div>
+    <pre><span class="file">submit.py · lines 122–144</span>def blend(models, oof, test_proba, y, fold_of, test, report, folds):
+    blend_oof = np.mean([oof[m] for m in models], axis=0)
+    blend_test = np.mean([test_proba[m] for m in models], axis=0)
+
+    # tune decision weights on folds 0-3, check them on fold 4, then refit on everything
+    dev, hold = fold_of != folds - 1, fold_of == folds - 1
+    w_dev, _ = decision.search_weights(blend_oof[dev], y[dev])
+    w_all, best_all = decision.search_weights(blend_oof, y)
+    report[&quot;blend&quot;] = {
+        &quot;models&quot;: list(models),
+        &quot;CV balanced accuracy, argmax&quot;: balanced_accuracy_score(y, blend_oof.argmax(1)),
+        &quot;held-out fold, argmax&quot;: balanced_accuracy_score(y[hold], blend_oof[hold].argmax(1)),
+        &quot;held-out fold, weights tuned on the other folds&quot;: balanced_accuracy_score(y[hold], decision.decide(blend_oof[hold], w_dev)),
+        &quot;weights (Low, Medium, High)&quot;: [round(float(v), 3) for v in w_all],
+        &quot;CV balanced accuracy, tuned weights (in-sample)&quot;: best_all,
+    }
+    labels = np.array(data.CLASSES)[decision.decide(blend_test, w_all)]
+    sub = pd.DataFrame({&quot;id&quot;: test[&quot;id&quot;], data.TARGET: labels})
+    sub.to_csv(OUT / &quot;submission.csv&quot;, index=False)
+    report[&quot;submission rows&quot;] = len(sub)
+    report[&quot;submission class shares&quot;] = sub[data.TARGET].value_counts(normalize=True).round(4).to_dict()
+    (OUT / &quot;report.json&quot;).write_text(json.dumps(report, indent=2, default=float))
+    return report</pre>
+    <h3>Full-data training</h3>
+    <pre><span class="file">submit.py · lines 60–71</span>def fit_one(name, model, X_tr, y_tr, X_va, y_va):
+    if name == &quot;lightgbm&quot;:
+        from lightgbm import early_stopping
+        model.fit(X_tr, y_tr, eval_set=[(X_va, y_va)], callbacks=[early_stopping(150, verbose=False)])
+        return model, model.best_iteration_
+    if name == &quot;xgboost&quot;:
+        model.fit(X_tr, y_tr, eval_set=[(X_va, y_va)], verbose=False)
+        return model, model.best_iteration
+    cat_idx = [X_tr.columns.get_loc(c) for c in data.CATEGORICAL]
+    model.fit(X_tr.astype({c: str for c in data.CATEGORICAL}), y_tr, cat_features=cat_idx,
+              eval_set=(X_va.astype({c: str for c in data.CATEGORICAL}), y_va))
+    return model, model.get_best_iteration()</pre>
+    <p>Each library gets early stopping on the validation fold (150 rounds without improvement), and categorical columns are handled natively: pandas categories for LightGBM and XGBoost, strings for CatBoost.</p>
+</section>
+
+<section class="chapter">
+    <p class="kicker">11 · Testing</p>
+    <h2>What was checked</h2>
+    <p class="lead">Unit tests of the package, checks inside the notebooks that compare from-scratch results with libraries, a full execution of every notebook, and the final test: Kaggle's hidden labels.</p>
+    <h3>1. Unit tests (pytest)</h3>
+    <table>
+        <thead><tr><th>Test</th><th>Checks</th><th>Result</th></tr></thead>
+        <tbody>
+            <tr><th><code>test_irrigate.py</code></th><td>domain features learn cutoff on training data only</td><td class="ok">Pass</td></tr><tr><th><code>test_irrigate.py</code></th><td>group stats use training means</td><td class="ok">Pass</td></tr><tr><th><code>test_irrigate.py</code></th><td>frequency encoder</td><td class="ok">Pass</td></tr><tr><th><code>test_irrigate.py</code></th><td>pipeline runs end to end with engineered features</td><td class="ok">Pass</td></tr><tr><th><code>test_irrigate.py</code></th><td>weight search beats argmax on imbalanced probabilities</td><td class="ok">Pass</td></tr>
+        </tbody>
+    </table>
+    <pre class="term"><span class="file">$ pytest -q</span>.....  [100%]
+5 passed in 1.70s</pre>
+    <h3>2. Checks inside the notebooks and the script</h3>
+    <table>
+        <thead><tr><th>What</th><th>Compared with</th><th>Result</th></tr></thead>
+        <tbody>
+            <tr><th>From-scratch perceptron</th><td>scikit-learn <code>Perceptron</code></td><td class="ok">0.884 vs 0.862 accuracy</td></tr>
+            <tr><th>Distance functions</th><td>SciPy <code>cdist</code></td><td class="ok">equal to 6 decimals</td></tr>
+            <tr><th>K-Means from scratch</th><td>scikit-learn (10 starts)</td><td class="ok">29,068 vs 28,706 inertia</td></tr>
+            <tr><th>SLR closed form</th><td>statsmodels OLS</td><td class="ok">identical coefficients</td></tr>
+            <tr><th>Leakage demonstrations</th><td>the honest pipeline</td><td class="ok">0.924 vs 0.606; 0.490 vs 0.330</td></tr>
+            <tr><th>My April approach, re-scored with this project's CV</th><td>its real Kaggle scores</td><td class="ok">0.9617 vs 0.9602 / 0.9608</td></tr>
+            <tr><th>Decision weights tuned on folds 1–4</th><td>fold 5</td><td class="ok">0.9622 → 0.9703</td></tr>
+            <tr><th>Final model</th><td>Kaggle's hidden labels</td><td class="ok">0.96985 public, 0.97126 private</td></tr>
+        </tbody>
+    </table>
+    <h3>3. Notebook execution</h3>
+    <p>Every notebook was executed top to bottom on a fresh kernel (Python 3.12, pandas 3.1, scikit-learn 1.9, LightGBM 4.7, XGBoost 3.4, CatBoost 1.2) with no errors. Reading every output against its text found and fixed several claims before publication:</p>
+    <ul>
+        <li>LOF does <i>not</i> catch the impossible combinations (3 of 20).</li>
+        <li>Min-max scaling makes k-NN worse, not better.</li>
+        <li>Tree ensembles do <i>not</i> beat linear regression on unseen countries.</li>
+        <li>The rounded regressor beats the classifier.</li>
+        <li>Single linkage gets the best Davies–Bouldin score.</li>
+        <li>A K-Medoids demo whose "outliers" formed their own cluster had to be redesigned.</li>
+    </ul>
+    <p>One problem found during the full-data run: CatBoost with its default categorical handling had finished only one of five folds after three and a half hours on a laptop CPU. The cause was its ordered target statistics, which are expensive and unnecessary for columns with at most 6 values. Setting <code>one_hot_max_size=10</code> brought all five folds down to 18 minutes. The first submission without CatBoost (public 0.96849, private 0.97068) and the final one with it (0.96985, 0.97126) are both kept on Kaggle.</p>
+</section>
+
+<section class="chapter">
+    <p class="kicker">12 · Deployment and conclusion</p>
+    <h2>Online, and what I learned</h2>
+    <table>
+        <tbody>
+            <tr><th>Website</th><td><a href="https://lushadowx.github.io/Irrigate/">https://lushadowx.github.io/Irrigate/</a></td></tr>
+            <tr><th>Source code</th><td><a href="https://github.com/LuShadowX/Irrigate">https://github.com/LuShadowX/Irrigate</a></td></tr>
+            <tr><th>Kaggle</th><td>late submissions to Playground Series S6E4 on 24 October 2026; final: public 0.96985, private 0.97126</td></tr>
+            <tr><th>Reproduce</th><td><code>pip install -e ".[dev]"</code>, download both datasets, then <code>pytest</code>, <code>python -m irrigate.submit --baseline</code> and <code>jupyter lab notebooks/</code></td></tr>
+        </tbody>
+    </table>
+    <figure class="fig-short"><img src="figures/kaggle-submissions.png" alt=""><figcaption><b>Fig. 28</b> · <b>All three submissions on Kaggle</b>, as the Kaggle API reports them (the scores are tabled in chapter 01).</figcaption></figure>
+    <h3>What I learned</h3>
+    <ul>
+        <li><b>The metric decides the model.</b> My first submission was a good classifier for the wrong objective. Matching the decision to balanced accuracy was worth more than any single model change.</li>
+        <li><b>Leakage is easy and invisible.</b> Both leakage demonstrations produced convincing scores. Pipelines that refit everything per fold are the only reliable protection.</li>
+        <li><b>Clean data is a finding.</b> No missing values, no outliers, independent features: knowing that told me which methods were worth using, and the injected-fault experiments showed what each method actually catches.</li>
+        <li><b>Feature engineering helps simple models most.</b> +18 points for logistic regression, +0.5 for gradient boosting.</li>
+        <li><b>"Best" depends on how you validate.</b> Validated by country, linear regression beat the tree ensembles; validated by time, a trend line beat autoregression.</li>
+        <li><b>Defaults have costs.</b> CatBoost's default categorical handling made full-data training impractical on a laptop; understanding what it does (and that this data didn't need it) turned hours into minutes.</li>
+    </ul>
+    <h3>Possible extensions</h3>
+    <ul>
+        <li>Stacking: a small meta-model on the out-of-fold probabilities instead of a plain average.</li>
+        <li>Optuna search over the LightGBM parameters at full scale.</li>
+    </ul>
+</section>
+
+</body>
+</html>
