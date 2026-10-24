@@ -1,0 +1,10 @@
+data/
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.pytest_cache/
+.DS_Store
+submissions/*.csv
+submissions/*.npy
+catboost_info/

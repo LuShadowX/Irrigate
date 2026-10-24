@@ -1,0 +1,35 @@
+[project]
+name = "irrigate"
+version = "1.0.0"
+description = "Applied machine learning on the Kaggle irrigation dataset: preprocessing to ensembles to clustering"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.0",
+    "pandas>=2.2",
+    "scipy>=1.13",
+    "matplotlib>=3.9",
+    "seaborn>=0.13",
+    "scikit-learn>=1.5",
+    "imbalanced-learn>=0.12",
+    "statsmodels>=0.14",
+    "xgboost>=2.0",
+    "lightgbm>=4.0",
+    "catboost>=1.2",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "jupyter", "nbconvert", "kaggle"]
+
+[project.scripts]
+irrigate-submit = "irrigate.submit:main"
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
