@@ -1,0 +1,41 @@
+{
+  "lightgbm": {
+    "CV balanced accuracy, argmax": 0.9620579386318227
+  },
+  "xgboost": {
+    "CV balanced accuracy, argmax": 0.9619879925067433
+  },
+  "blend": {
+    "models": [
+      "lightgbm",
+      "xgboost",
+      "catboost"
+    ],
+    "CV balanced accuracy, argmax": 0.9623634168645895,
+    "held-out fold, argmax": 0.9621689538060059,
+    "held-out fold, weights tuned on the other folds": 0.9703254535241946,
+    "weights (Low, Medium, High)": [
+      1.0,
+      0.518,
+      8.437
+    ],
+    "CV balanced accuracy, tuned weights (in-sample)": 0.971489597636683
+  },
+  "submission rows": 270000,
+  "submission class shares": {
+    "Low": 0.5929,
+    "Medium": 0.367,
+    "High": 0.0401
+  },
+  "catboost": {
+    "seconds": 1070.7,
+    "trees per fold": [
+      2998,
+      2974,
+      2825,
+      2452,
+      2996
+    ],
+    "CV balanced accuracy, argmax": 0.961235070051352
+  }
+}
